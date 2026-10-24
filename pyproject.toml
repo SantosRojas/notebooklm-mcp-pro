@@ -1,0 +1,72 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "notebooklm-mcp-pro"
+version = "0.1.0"
+description = "Servidor MCP profesional para NotebookLM (Gemini Notebook): lectura de fuentes en Markdown, búsqueda, chat con citas y escritura controlada."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "notebooklm-mcp-pro contributors" }]
+keywords = ["mcp", "notebooklm", "google", "agent", "rag", "markdown"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+dependencies = [
+  "mcp>=2.3,<3",
+  # API no oficial: se fija la versión menor porque Google puede romperla sin aviso.
+  # [markdown]: markdownify es requisito de sources.get_fulltext(output_format="markdown"),
+  # que es el camino central de la caché/exportación — sin él TODAS las descargas fallan.
+  "notebooklm-py[markdown]>=0.8.5,<0.9",
+]
+
+[project.optional-dependencies]
+# Necesario solo para ejecutar `notebooklm login` (abre un navegador con Playwright).
+browser = ["notebooklm-py[browser]>=0.8.5,<0.9"]
+dev = ["pytest>=8", "pytest-asyncio>=0.24", "ruff>=0.9", "mypy>=1.13"]
+
+[project.scripts]
+notebooklm-mcp-pro = "nlm_mcp.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nlm_mcp"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["src"]
+filterwarnings = ["error::DeprecationWarning:nlm_mcp"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+src = ["src"]
+
+[tool.ruff.lint]
+# Ambito deliberado: errores reales (pyflakes, sintaxis), orden de imports y bugbear.
+# Reglas UP*/SIM*/S*/RUF* son toleradas: el código usa patrones try-except-pass y
+# dataclasses antiguos de forma intencional.
+select = ["E4", "E7", "E9", "F", "I", "B"]
+ignore = ["B008"]  # Field(...) como valor por defecto de Annotated: patrón del SDK MCP
+
+[tool.mypy]
+# Configuración laxa a propósito: el valor está en cazar errores reales de tipos en CI,
+# no en imponer anotaciones estrictas sobre código que ya funciona.
+python_version = "3.10"
+files = ["src"]
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true

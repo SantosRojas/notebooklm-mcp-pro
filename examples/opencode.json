@@ -1,0 +1,14 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "notebooklm": {
+        "type": "local",
+        "command": ["C:\\Projects\\PYTHON\\notebooklm-mcp\\.venv\\Scripts\\notebooklm-mcp-pro.exe"],
+        "environment": {
+          "NLM_MCP_MODE": "readonly"
+        }
+      }
+    }
+  }
+}

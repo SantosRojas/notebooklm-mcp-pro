@@ -1,0 +1,7 @@
+# Eol uniforme en todo el repo (evita mezclarlf/CRLF entre Windows y CI Linux)
+* text=auto eol=lf
+
+# Binarios conocidos
+*.png binary
+*.jpg binary
+*.pdf binary

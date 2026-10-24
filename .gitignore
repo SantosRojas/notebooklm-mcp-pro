@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.egg-info/
+dist/
+.env
+storage_state.json
+.pytest_cache/
+
+# Artefactos del MCP de Playwright (capturas, trazas, sesiones)
+.playwright-mcp/
+
+# Documentos de conocimiento del negocio (Información de la empresa): quedan SOLO en local,
+# no van al repositorio público porque no tienen relación con este proyecto
+docs/intelisis-db-guia-agente.md
+docs/*.local.md

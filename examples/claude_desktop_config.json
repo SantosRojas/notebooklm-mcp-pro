@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "notebooklm": {
+      "command": "/RUTA/ABSOLUTA/notebooklm-mcp-pro/.venv/bin/notebooklm-mcp-pro",
+      "env": {
+        "NLM_MCP_MODE": "readonly"
+      }
+    }
+  }
+}
