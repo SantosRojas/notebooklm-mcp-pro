@@ -13,3 +13,4 @@ storage_state.json
 # no van al repositorio público porque no tienen relación con este proyecto
 docs/intelisis-db-guia-agente.md
 docs/*.local.md
+.engram/
