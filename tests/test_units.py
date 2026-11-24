@@ -195,6 +195,14 @@ def test_cache_roundtrip_ttl_and_perms(tmp_path):
     assert cache.get("nb", "s1") is None
 
 
+def test_cache_ignores_orphan_temp_files(tmp_path):
+    """Un .tmp-*.md de una escritura atómica interrumpida no debe aparecer como fuente."""
+    cache = SourceCache(tmp_path, ttl=1000)
+    cache.put("nb", SourceContent("s1", "T", "contenido", 9))
+    (tmp_path / "notebooks" / "nb" / ".tmp-huérfano.md").write_text("resto")
+    assert cache.cached_ids("nb") == ["s1"]
+
+
 def test_cache_expiry_and_ttl_zero(tmp_path):
     cache = SourceCache(tmp_path, ttl=1)
     cache.put("nb", SourceContent("s1", "T", "c", 1))

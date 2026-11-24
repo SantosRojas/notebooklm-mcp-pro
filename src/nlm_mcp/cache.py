@@ -95,7 +95,9 @@ class SourceCache:
         d = self._nb_dir(notebook_id)
         if not d.is_dir():
             return []
-        return sorted(p.stem for p in d.glob("*.md"))
+        # Los temporales de _atomic_write (.tmp-*.md) pueden quedar tras un corte de energía;
+        # su nombre no es un ID válido y haría fallar invalidate() en el siguiente sync().
+        return sorted(p.stem for p in d.glob("*.md") if not p.name.startswith("."))
 
     def age_seconds(self, notebook_id: str, source_id: str) -> float | None:
         try:
