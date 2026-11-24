@@ -39,15 +39,43 @@ Requiere Python ≥ 3.10.
 
 ```bash
 cd notebooklm-mcp-pro
-python -m venv .venv
-source .venv/bin/activate            # Windows: .venv\Scripts\activate
-pip install -e ".[browser]"          # incluye Playwright, necesario solo para el login
+uv sync --extra browser              # o: python -m venv .venv && pip install -e ".[browser]"
+source .venv/bin/activate            # bash/zsh | fish: source .venv/bin/activate.fish
 playwright install chromium          # si el login pide el navegador de Playwright
 notebooklm login                     # abre el navegador y guarda la sesión (storage_state.json)
 notebooklm-mcp-pro --check           # verifica configuración y sesión
 ```
 
+> **Fish:** `.venv/bin/activate` es un script de bash y falla con `Unsupported use of '='`. Usa
+> `source .venv/bin/activate.fish`, o evita activar nada con `uv run notebooklm-mcp-pro --check`.
+
 `--check` imprime un JSON de estado y devuelve código `0` si la sesión es válida (`auth: ok`).
+
+### Servidor sin navegador (headless)
+
+`notebooklm login` abre un navegador con Playwright, así que no sirve en un servidor sin escritorio
+(ni en Alpine/musl, donde Playwright no tiene binarios). El login se hace **en tu equipo local** y
+solo se copia el archivo de sesión:
+
+```bash
+# 1) En tu equipo local (con navegador), misma versión de notebooklm-py:
+pipx install "notebooklm-py[browser]==0.8.5"
+notebooklm login
+
+# 2) Copia la sesión al servidor (es un secreto: permisos 600):
+scp ~/.notebooklm/profiles/default/storage_state.json \
+    usuario@servidor:~/.notebooklm/profiles/default/storage_state.json
+
+# 3) En el servidor: apunta el servidor MCP a esa sesión y verifica
+export NLM_STORAGE_PATH="$HOME/.notebooklm/profiles/default/storage_state.json"
+notebooklm-mcp-pro --check
+```
+
+Si prefieres no copiar archivos, `notebooklm auth import-cookies cookies.json` acepta un
+`storage_state` de Playwright o cookies exportadas desde tu navegador (JSON).
+
+Cuando Google caduque la sesión, repite los pasos 1-2. Los errores de auth del servidor MCP
+(`auth: error`) apuntan a este mismo remedio.
 
 ### Conectarlo a opencode
 
@@ -247,6 +275,8 @@ y una lectura sobre un notebook de prueba.
 |---|---|
 | `auth: error` / «No hay sesión» | Ejecuta `notebooklm login` o define `NLM_STORAGE_PATH` |
 | Sesión caducada | Repite `notebooklm login` y reinicia el cliente MCP |
+| Servidor sin navegador / `playwright` no instala | Haz el login en tu equipo y copia `storage_state.json` (ver «Servidor sin navegador») |
+| `source .venv/bin/activate` falla en fish | Usa `source .venv/bin/activate.fish` o `uv run` |
 | «Google aplicó un límite» | Baja `NLM_MAX_CONCURRENCY` y espera unos minutos |
 | `read_source` devuelve poco | Es una página: sigue con `next_offset` o usa `read_source_section` |
 | Una fuente no aparece en búsquedas locales | Solo se descargan fuentes en estado `ready`; revisa `list_sources` |
